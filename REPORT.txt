@@ -1,0 +1,99 @@
+****************************
+*          REPORT          *
+*                          *
+* CS 526 - Project 1       *
+* Daniele MIDI             *
+* dmidi@purdue.edu         *
+****************************
+
+
+MESSAGE DIGEST (HASHING)
+------------------------
+I chose to use SHA-256 for hashing and HMAC.
+I used OpenSSL's engine interface for digests.
+I created a small wrapper library in "crypto_digest.c".
+
+
+SYMMETRIC ENCRYPTION (AES)
+--------------------------
+I chose to use AES with 256 bit key and CBC encryption mode.
+I used OpenSSL's engine interface for symmetric encryption.
+I created a small wrapper library in "crypto_sym.c".
+
+
+INITIALIZATION VECTOR (IV) FOR AES
+----------------------------------
+For the block cipher, an IV is needed to achieve a better security level (i.e. not letting the attacker infer information from the first block).
+This IV should be generated unpredictably for each encryption, and sent/stored (even in the clear) alongside the encrypted message, to allow decryption.
+Therefore, to achieve this level of security for this project, I would be required to store the IV alongside each log entry.
+However, in order not to alter the format of the log entries specified in the paper, I chose to simplify this issue by choosing an always-fixed value for the IV, known to all and only the authorized parties (namely, U, T and the various V's).
+
+
+PUBLIC KEY ENCRYPTION (RSA)
+---------------------------
+I chose to use 2048 bit keys for RSA.
+For simplicity of implementation, I'm not using OpenSSL's engine interface for RSA. Instead, as I control the maximum length of the data to be encrypted with RSA, I decided to use the low-level APIs for public key encryption/decryption.I created a small wrapper library in "crypto_rsa.c".
+
+
+DIGITAL SIGNATURE (RSA)
+-----------------------
+As for public key encryption, for the digital signature I avoided the use of OpenSSL's engine interface. Instead, I directly used the RSA_sign/RSA_verify couple of function to sign and verify the SHA-256 hash of the message to sign.
+Again, I chose to use 2048 bit keys for RSA.
+
+
+PROGRAM INTERFACE: main.c
+-------------------------
+File main.c contains all the code responsible for reading and parsing the commands from the console, and executing the related protocol functions. Log entries input through the console can be long up to 255 characters.
+
+
+PROTOCOL IMPLEMENTATION: ACTORS
+-------------------------------
+The implementation of the protocol is in file protocol.c.
+As a convention, I appended "_<actorname>" (where <actorname> can be U, T or V) to the name of the functions related to a specific actor, to highlight who's performing that action in the context of a command execution. E.g., the names of the functions that are supposedly executed by U end with "_U".
+For example, in the context of the command CREATELOG, the function sequence is the following: initlog_U() -> initlog_T() -> completeinitlog_U().
+Whenever needed, the message passing of an actor to another is done through parameters in the subsequent function call. To make the implementation as close as a real-world one as possible, the messages between the functions of different actors are always created as a single byte sequence message (to simulate the actual sending of a message through the network). Therefore, the format of the messages detailed in the paper is preserved. The messages are formed by concatenation of multiple byte buffers into one ("packing") at the source, and separation of a byte buffer into multiple parts ("unpacking") at the destination.
+Packing and unpacking are achieved easily through two functions in file "memutils.c" (namely, memcat() and memsplit()). See the comments in the source code for more details.
+
+
+PROTOCOL IMPLEMENTATION: FUNCTIONS DETAILS
+------------------------------------------
+void init_crypto();
+void uninit_crypto();
+    These two function initialize and clean up the data structures required by OpenSSL. They are executed only once per program execution.
+
+int buildandstoreentry(int type, char *data, int len);
+    This function created a correctly formatted and encrypted log entry from an entry type and a byte buffer content. Also, it updates a_i.
+
+void initlog_U(char *logname);
+void initlog_T(char *m, int mlen);
+void completeinitlog_U(char *m, int mlen);
+    This group of function implement the message passing between U and T in the steps of log creation.
+
+void closelog_U();
+    This function implement log closing by U.
+
+char * verifyentry_V(int entryindex);
+char * verifyentry_T(char *vid, char *m, int mlen);
+int checkverifierpermissions_T(char *vid, int entrytype);
+char * completeverifyentry_V(char *m, int mlen);
+    This group of function implement the message passing between a verifier V and T in the steps of a log entry verification and decryption.
+
+void verifyallentries_T(char *logname, char *outfile);
+    This function implement the verification and decryption of all the entries by T.
+
+void storea_0forlog(char *logname, char *a_0);
+char * reada_0forlog(char *logname);
+    These two functions store and read the a_0 key for a specific log in the filesystem at T.
+
+
+LOG FORMAT DETAILS
+------------------
+All the entries are written in binary format (byte by byte) in the log file (extension .log).
+Every entry is terminated with a sequence "\r\n".
+This sequence is used to identify the end of each log entry when reading back the file for verification (by V or T).
+
+
+A_0 MANAGEMENT AT T
+-------------------
+During the initialization of every log, T is able to extract a_0 from the message coming from U.
+This value is then stored locally (at T) in a file called "<logname>.a_0.log" (e.g. during the creation of "log1", the log will be stored at U in a file named "log1.log", while a_0 will be stored at T in a file named "log1.a_0.log").
