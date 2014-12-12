@@ -1,17 +1,13 @@
-Secure Audit Log
+#Secure Audit Log
 Author: Daniele MIDI (dmidi@purdue.edu)
 
---------
-OVERVIEW
---------
+##OVERVIEW
 Very often, sensitive information have to be kept in log files on untrusted machines.
 In the event that an attacker captures this machine, we would like to guarantee that he will gain little or no information from the log files, and to limit his ability to corrupt the log files.
 The protocol implemented in this Secure Audit Log system is described in the paper "Secure Audit Logs to Support Computer Forensics", by Bruce Schneier and John Kelsey, available at http://www.schneier.com/paper-auditlogs.html.
 
 
---------
-MAKEFILE
---------
+##MAKEFILE
 make
 	this will compile all the necessary files into "main".
 make clean
@@ -21,9 +17,7 @@ make deepclean
     certificates (extension *.pem) in the current directory.
 
 
---------------
-KEY GENERATION
---------------
+##KEY GENERATION
 The script gen_keys.sh will clear all possible previous key files in the current directory (extension *.pem).
 Then it will generate private RSA keys (2048 bit) and self-signed public key certificates for both U and T.
 The script will generate the following files:
@@ -33,9 +27,7 @@ The script will generate the following files:
   - pub-keyU.pem : U's self-signed public key certificate
 
 
-----------------------
-HOW TO RUN THE PROGRAM
-----------------------
+##HOW TO RUN THE PROGRAM
 Execute the following commands:
     ./gen_keys.sh
     make clean
@@ -45,9 +37,7 @@ Execute the following commands:
 (See section "Sample execution" below in this document for an example of expected execution and output.)
 
 
-------------------
-AVAILABLE COMMANDS
-------------------
+##AVAILABLE COMMANDS
 EXIT
     This closes the program.
 
@@ -70,9 +60,7 @@ VERIFYALL logfile outputfile
     It verifies all the entries and decrypts them all into a file called "<outputfile>.log" from the current directory.
 
 
-----------------
-SAMPLE EXECUTION
-----------------
+##SAMPLE EXECUTION
 > createlog log7
 Log log7 created successfully.
 > add Primo
