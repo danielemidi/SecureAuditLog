@@ -8,13 +8,15 @@ The protocol implemented in this Secure Audit Log system is described in the pap
 
 
 ##MAKEFILE
-make
-	this will compile all the necessary files into "main".
-make clean
-	will delete all the binary files, plus all the log/output files (extension *.log) in the current directory.
-make deepclean
-	will delete all the binary files, plus all the log/output files (extension *.log), plus all the keys and 
-    certificates (extension *.pem) in the current directory.
+
+    make
+this will compile all the necessary files into "main".
+
+    make clean
+will delete all the binary files, plus all the log/output files (extension *.log) in the current directory.
+
+    make deepclean
+will delete all the binary files, plus all the log/output files (extension *.log), plus all the keys and certificates (extension *.pem) in the current directory.
 
 
 ##KEY GENERATION
@@ -29,6 +31,7 @@ The script will generate the following files:
 
 ##HOW TO RUN THE PROGRAM
 Execute the following commands:
+
     ./gen_keys.sh
     make clean
     make
@@ -38,29 +41,28 @@ Execute the following commands:
 
 
 ##AVAILABLE COMMANDS
-EXIT
-    This closes the program.
 
-CREATELOG logname
-    This creates a logfile called "<logname>.log" in the current directory.
+    EXIT
+This closes the program.
 
-ADD msg
-    This adds a new entry with content "msg" to the currently open log.
-    msg can be 255 characters long at most.
-    In case of success, the index of the new entry is displayed.
+    CREATELOG logname
+This creates a logfile called "<logname>.log" in the current directory.
 
-CLOSELOG
-    This closes the current log, adding the closing entry.
+    ADD msg
+This adds a new entry with content "msg" to the currently open log. msg can be 255 characters long at most. In case of success, the index of the new entry is displayed.
 
-VERIFY entryindex
-    This verifies the entry at index entryindex. If the verification succeeds, the entry content is displayed.
+    CLOSELOG
+This closes the current log, adding the closing entry.
 
-VERIFYALL logfile outputfile
-    This read a logfile called "<logname>.log" from the current directory.
-    It verifies all the entries and decrypts them all into a file called "<outputfile>.log" from the current directory.
+    VERIFY entryindex
+This verifies the entry at index entryindex. If the verification succeeds, the entry content is displayed.
+
+    VERIFYALL logfile outputfile
+This read a logfile called "<logname>.log" from the current directory. It verifies all the entries and decrypts them all into a file called "<outputfile>.log" from the current directory.
 
 
 ##SAMPLE EXECUTION
+```
 > createlog log7
 Log log7 created successfully.
 > add Primo
@@ -81,3 +83,4 @@ Verifying entry 4... Contorno
 Verifying all entries of log log7 to file a7...
 All entries of log log7 verified into file a7...
 > exit
+```
